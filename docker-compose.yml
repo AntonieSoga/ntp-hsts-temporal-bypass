@@ -1,0 +1,48 @@
+services:
+  # 1. Target Web Server (HSTS Policy Provider)
+  webserver:
+    image: nginx:alpine
+    container_name: docker-webserver-1
+    volumes:
+      - ./webserver/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./webserver/certs:/etc/nginx/certs:ro
+    networks:
+      lab_net:
+        ipv4_address: 10.5.0.10
+
+  # 2. Attacker (NTP Spoofer & SSL Stripper)
+  attacker:
+    image: kalilinux/kali-rolling
+    container_name: docker-attacker-1
+    privileged: true
+    tty: true
+    volumes:
+      - ./attacker:/opt/attacker
+    networks:
+      lab_net:
+        ipv4_address: 10.5.0.20
+    # Installs Scapy, Bettercap, and libpcap for packet filtering
+    command: >
+      bash -c "apt update && 
+      apt install -y python3-scapy libpcap-dev bettercap curl iptables && 
+      tail -f /dev/null"
+
+  # 3. Victim (Simulated Client)
+  victim:
+    image: ubuntu:latest
+    container_name: docker-victim-1
+    networks:
+      lab_net:
+        ipv4_address: 10.5.0.30
+    # Installs tools for NTP syncing and HSTS testing
+    command: >
+      bash -c "apt update && 
+      apt install -y curl ntpdate libfaketime && 
+      tail -f /dev/null"
+
+networks:
+  lab_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/24
