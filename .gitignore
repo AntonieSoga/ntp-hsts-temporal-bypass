@@ -1,0 +1,6 @@
+# Ignore Keys and Certs (Generate these fresh per deploy)
+webserver/certs/
+
+# Ignore Docker build cache/logs
+.DS_Store
+*.log
