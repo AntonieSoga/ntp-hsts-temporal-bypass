@@ -134,11 +134,11 @@ docker exec attacker-mitm cat /var/log/nginx/creds.log
 
 ![password](.img/pass.png)
 
-### 🛡️ Remediation (The Fix)
+## 🛡️ Remediation (The Fix)
 
 This attack is possible because NTP (Network Time Protocol) is unauthenticated. The solution is NTS (Network Time Security).
 
-#### How NTS prevents this
+### How NTS prevents this
 
 1. NTS uses TLS to authenticate the time server.
 
@@ -147,3 +147,37 @@ This attack is possible because NTP (Network Time Protocol) is unauthenticated. 
 3. The client rejects the fake time update, keeping the clock at 2026.
 
 4. HSTS remains active, and the attack fails.
+
+## 📚 References & Further Reading
+
+### 1. Core Standards (IETF RFCs)
+* **[RFC 6797 - HTTP Strict Transport Security (HSTS)](https://tools.ietf.org/html/rfc6797)**
+  Defines the web security policy mechanism. Section 12.3 explicitly lists "NTP Attacks" as a known threat vector where manipulating the clock can expire the policy.
+
+* **[RFC 5905 - Network Time Protocol Version 4](https://tools.ietf.org/html/rfc5905)**
+  The specification for NTPv4. It highlights that standard NTP (without Autokey or NTS) lacks strong cryptographic authentication, making it vulnerable to the spoofing used in this lab.
+
+* **[RFC 3833 - Threat Analysis of the Domain Name System (DNS)](https://tools.ietf.org/html/rfc3833)**
+  An official analysis of DNS vulnerabilities, specifically defining "Man-in-the-Middle" and "ID Spoofing" attacks, which serve as the foundation for the DNS poisoning phase of this lab.
+
+* **[RFC 8915 - Network Time Security (NTS)](https://tools.ietf.org/html/rfc8915)**
+  The modern remediation. It introduces TLS-based authentication for time servers to prevent the exact attack demonstrated in this project.
+
+### 2. Foundational Security Research
+
+* **"Bypassing HTTP Strict Transport Security" (Jose Selvi, Black Hat Europe 2014)**
+  The seminal presentation that introduced the concept of "Temporal MITM" attacks. This lab is a containerized reproduction of Selvi's "Delorean" attack concept.
+  * [Presentation Slides (Black Hat Archives)](https://blackhat.com/docs/eu-14/materials/eu-14-Selvi-Bypassing-HTTP-Strict-Transport-Security.pdf)
+
+* **"New Tricks For Defeating SSL In Practice" (Moxie Marlinspike, Black Hat DC 2009)**
+  The original release of **SSLstrip**. This research demonstrated that HSTS is necessary because users can be tricked into using HTTP if the initial redirection is intercepted. This lab utilizes this technique in the final exploit phase.
+
+* **"It’s The End Of The Cache As We Know It" (Dan Kaminsky, Black Hat USA 2008)**
+  While this lab uses local MITM configuration, Kaminsky's research is the foundational work on **DNS Cache Poisoning**. It demonstrated the fragility of DNS trust, which this lab exploits to redirect the victim to the proxy.
+
+### 3. Tools & Methodologies
+
+* **[Nginx Reverse Proxy Module](https://nginx.org/en/docs/http/ngx_http_proxy_module.html)**
+  Used in this lab to perform the MITM attack. Specifically, the `proxy_pass` and `proxy_redirect` directives allow for the seamless interception and modification of traffic.
+* **[Dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html)**
+  The lightweight DNS forwarder used in this lab to simulate a "Poisoned DNS" environment by authoritatively resolving the target domain to the attacker's IP.
