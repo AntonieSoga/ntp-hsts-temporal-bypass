@@ -151,6 +151,7 @@ This attack is possible because NTP (Network Time Protocol) is unauthenticated. 
 ## 📚 References & Further Reading
 
 ### 1. Core Standards (IETF RFCs)
+
 * **[RFC 6797 - HTTP Strict Transport Security (HSTS)](https://tools.ietf.org/html/rfc6797)**
   Defines the web security policy mechanism. Section 12.3 explicitly lists "NTP Attacks" as a known threat vector where manipulating the clock can expire the policy.
 
